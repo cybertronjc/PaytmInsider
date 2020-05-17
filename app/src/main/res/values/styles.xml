@@ -1,0 +1,52 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="LightTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="gray_back">@color/gray_back</item>
+        <item name="text_color">@color/text_color</item>
+        <item name="error_color">@color/error_color</item>
+        <item name="view_color">@color/view_color</item>
+        <item name="title_color">@color/title_color</item>
+        <item name="screen_back">@color/screen_back</item>
+        <item name="cardBack">@color/cardBack</item>
+        <item name="blacknwhite">@color/blacknwhite</item>
+        <item name="switchGrey">@color/switchGrey</item>
+        <item name="green_color">@color/green_color</item>
+        <item name="whitenblack">@color/whitenblack</item>
+        <item name="button_back">@color/button_back</item>
+        <item name="background">@color/background</item>
+        <item name="colorHigh">@color/colorHigh</item>
+    </style>
+
+    <style name="DarkTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/colorPrimarydark1</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkdark</item>
+        <item name="colorAccent">@color/colorAccentDark</item>
+        <item name="gray_back">@color/gray_backDark</item>
+        <item name="text_color">@color/text_colorDark</item>
+        <item name="blacknwhite">@color/blacknwhiteDark</item>
+        <item name="error_color">@color/error_colorDark</item>
+        <item name="view_color">@color/view_colorDark</item>
+        <item name="cardBack">@color/cardBackDark</item>
+        <item name="whitenblack">@color/whitenblackDark</item>
+        <item name="title_color">@color/title_colorDark</item>
+        <item name="screen_back">@color/screen_backDark</item>
+        <item name="button_back">@color/button_backDark</item>
+        <item name="green_color">@color/green_colorDark</item>
+        <item name="background">@color/backgroundDark</item>
+        <item name="switchGrey">@color/switchDark</item>
+        <item name="colorHigh">@color/colorHighDark</item>
+    </style>
+
+
+</resources>
