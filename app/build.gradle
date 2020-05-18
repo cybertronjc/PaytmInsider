@@ -80,4 +80,14 @@ dependencies {
     def coroutines_version = "1.2.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+
+    //lottie animations
+    implementation 'com.airbnb.android:lottie:3.3.1'
+
+    implementation 'com.crowdfire.cfalertdialog:cfalertdialog:1.1.0'
+
+    //espresso
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
 }

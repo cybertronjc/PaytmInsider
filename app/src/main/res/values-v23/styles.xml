@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="LightTheme" parent="AppTheme">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="gray_back">@color/gray_back</item>
+        <item name="text_color">@color/text_color</item>
+        <item name="error_color">@color/error_color</item>
+        <item name="view_color">@color/view_color</item>
+        <item name="title_color">@color/title_color</item>
+        <item name="screen_back">@color/screen_back</item>
+        <item name="cardBack">@color/cardBack</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="blacknwhite">@color/blacknwhite</item>
+        <item name="switchGrey">@color/switchGrey</item>
+        <item name="green_color">@color/green_color</item>
+        <item name="whitenblack">@color/whitenblack</item>
+        <item name="button_back">@color/button_back</item>
+        <item name="background">@color/background</item>
+        <item name="colorHigh">@color/colorHigh</item>
+    </style>
+</resources>

@@ -15,6 +15,9 @@
     <color name="not_back">#E5E2EB</color>
     <color name="cardBack">#FFFFFF</color>
     <color name="switchGrey">#3A314D</color>
+    <color name="back_start">#FFFFFF</color>
+    <color name="back_end">#FFB5B5</color>
+    <color name="back_center">#FBDADA</color>
     <color name="item_back">#F1F1F1</color>
     <color name="colorHigh">#E0FAE0</color>
     <color name="blue">#0000FF</color>
@@ -36,6 +39,9 @@
     <color name="screen_backDark">#000000</color>
     <color name="whitenblackDark">#000000</color>
     <color name="green_colorDark">#00B400</color>
+    <color name="back_startDark">#000000</color>
+    <color name="back_endDark">#000000</color>
+    <color name="back_centerDark">#000000</color>
     <color name="cardBackDark">#5C5C5C</color>
     <color name="backgroundDark">#757575</color>
     <color name="switchDark">#D5D5D5</color>

@@ -1,6 +1,8 @@
 package me.jagdishchoudhary.paytminsider.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,8 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 import me.jagdishchoudhary.paytminsider.R;
+import me.jagdishchoudhary.paytminsider.WebActivity;
 import me.jagdishchoudhary.paytminsider.models.EventModel;
 
 import java.util.List;
@@ -60,9 +64,22 @@ public class FeaturedEventsAdapter extends RecyclerView.Adapter<FeaturedEventsAd
         holder.event_time.setText(eventModel.getVenue_date_string());
         holder.event_price.setText("Rs. "+eventModel.getPrice_display_string());
         holder.event_type.setText(eventModel.getCategory().get("name").getAsString());
-        Picasso.get().load(eventModel.getVertical_image()).into(holder.event_image);
+        Glide.with(context).load(eventModel.getVertical_image()).into(holder.event_image);
 
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Intent intent = new Intent(context, WebActivity.class);
+                    intent.putExtra("url", "https://insider.in/"+ eventModel.getSlug() + "/event");
+                    context.startActivity(intent);
 
+                }
+                catch (Exception e){
+                    Log.d("error", e.toString());
+                }
+            }
+        });
     }
 
     @Override

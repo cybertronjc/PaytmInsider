@@ -16,8 +16,9 @@ public class EventModel {
     private JsonObject group;
     private String min_price;
     private String price_display_string;
+    private String slug;
 
-    public EventModel(String id, String name, String horizontal_cover_image, String vertical_image, String city, String venue_name, String venue_date_string, JsonObject category, JsonObject group, String min_price, String price_display_string) {
+    public EventModel(String id, String name, String horizontal_cover_image, String vertical_image, String city, String venue_name, String venue_date_string, JsonObject category, JsonObject group, String min_price, String price_display_string, String slug) {
         this.id = id;
         this.name = name;
         this.horizontal_cover_image = horizontal_cover_image;
@@ -29,6 +30,7 @@ public class EventModel {
         this.group = group;
         this.min_price = min_price;
         this.price_display_string = price_display_string;
+        this.slug = slug;
     }
 
     public String getId() {
@@ -117,5 +119,13 @@ public class EventModel {
 
     public void setPrice_display_string(String price_display_string) {
         this.price_display_string = price_display_string;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
     }
 }

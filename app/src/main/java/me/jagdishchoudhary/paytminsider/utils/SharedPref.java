@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 public class SharedPref {
     SharedPreferences mySharedPref ;
     public SharedPref(Context context) {
-        mySharedPref = context.getSharedPreferences("nightmode",Context.MODE_PRIVATE);
+        mySharedPref = context.getSharedPreferences("userpref",Context.MODE_PRIVATE);
     }
     // this method will save the nightMode State : True or False
     public void setNightModeState(Boolean state) {
@@ -18,5 +18,16 @@ public class SharedPref {
     public Boolean loadNightModeState (){
         Boolean state = mySharedPref.getBoolean("NightMode",false);
         return  state;
+    }
+
+    public void setCity(String city){
+        SharedPreferences.Editor editor = mySharedPref.edit();
+        editor.putString("city",city);
+        editor.apply();
+    }
+
+    public String getCity(){
+        String city = mySharedPref.getString("city", "");
+        return  city;
     }
 }

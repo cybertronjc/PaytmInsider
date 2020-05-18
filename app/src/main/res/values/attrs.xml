@@ -17,4 +17,6 @@
     <attr name="button_back" format="color"/>
     <attr name="blacknwhite" format="color"/>
     <attr name="whitenblack" format="color"/>
-</resources>
+    <attr name="back_start" format="color"/>
+    <attr name="back_center" format="color"/>
+    <attr name="back_end" format="color"/></resources>

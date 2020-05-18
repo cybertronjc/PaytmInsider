@@ -1,22 +1,28 @@
  package me.jagdishchoudhary.paytminsider;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.*;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.Glide;
+import com.crowdfire.cfalertdialog.CFAlertDialog;
 import com.facebook.shimmer.ShimmerFrameLayout;
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -27,8 +33,6 @@ import me.jagdishchoudhary.paytminsider.models.EventModel;
 import me.jagdishchoudhary.paytminsider.utils.SharedPref;
 import me.jagdishchoudhary.paytminsider.utils.SliderUtil;
 import me.jagdishchoudhary.paytminsider.viewmodels.EventsViewModel;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.*;
 
@@ -44,32 +48,60 @@ import java.util.*;
      List<SliderUtil> sliderImg;
      ViewPagerAdapter viewPagerAdapter;
      Switch aSwitch;
+     ConstraintLayout rootView;
      SharedPref sharedPref;
     EventsViewModel eventsViewModel;
     RecyclerView featured_recycler, comedy_recycler, music_recycler, workshop_recycler, online_recycler, health_recycler;
     private List<EventModel> featuredEventsList = new ArrayList<>();
     LinearLayoutManager featuredLayout, comedyLayout, musicLayout, workshopLayout, onlineLayout, healthLayout;
     ShimmerFrameLayout featuredShimmer, comedyShimmer, musicShimmer, workshopShimmer, onlineShimmer, healthShimmer, bannerShimmer;
-
+    String[] cities = {"Mumbai", "Delhi", "Banglore", "Hyderabad", "Kolkata", "Pune"};
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         sharedPref = new SharedPref(this);
         if (sharedPref.loadNightModeState()) {
             setTheme(R.style.DarkTheme);
+            // In Activity's onCreate() for instance
+            Window window =getWindow();
+
+// clear FLAG_TRANSLUCENT_STATUS flag:
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+// finally change the color
+            window.setStatusBarColor(ContextCompat.getColor(this, R.color.screen_backDark));
+
         } else {
             setTheme(R.style.LightTheme);
-        }
-        setContentView(R.layout.activity_main);
+            // In Activity's onCreate() for instance
+            Window window =getWindow();
 
+// clear FLAG_TRANSLUCENT_STATUS flag:
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+// finally change the color
+            window.setStatusBarColor(ContextCompat.getColor(this, R.color.screen_back));
+        }
+
+        setContentView(R.layout.activity_main);
         insiderGif = findViewById(R.id.insiderGif);
         aSwitch = findViewById(R.id.darkTheme);
 
         Glide.with(this).asGif().load(R.raw.insider).into(insiderGif);
         Log.d("night", sharedPref.loadNightModeState().toString());
 
+
         if (sharedPref.loadNightModeState()){
             aSwitch.setChecked(true);
+
         }
         else {
             aSwitch.setChecked(false);
@@ -108,6 +140,7 @@ import java.util.*;
                 }
             }
         });
+
 
         featuredShimmer = findViewById(R.id.featuredShimmer);
         featured_recycler = findViewById(R.id.featured_recycler);
@@ -154,173 +187,210 @@ import java.util.*;
 
         eventsViewModel = ViewModelProviders.of(this).get(EventsViewModel.class);
         eventsViewModel.init();
-        eventsViewModel.getEventRepository().observe(this, jsonObject -> {
+        if (!sharedPref.getCity().isEmpty()) {
+            eventsViewModel.getEventRepository(sharedPref.getCity()).observe(this, jsonObject -> {
+                updateUI(jsonObject);
+            });
+        }
+        else {
+            showCities();
+        }
+    }
 
-            Log.d("response", jsonObject.toString());
-            Log.d("featured_events", jsonObject.get("featured").getAsJsonArray().toString());
+    private void updateUI(JsonObject jsonObject){
+        Log.d("response", jsonObject.toString());
+        Log.d("featured_events", jsonObject.get("featured").getAsJsonArray().toString());
 
-            //featured events
-            JsonArray featuredEvents = new JsonArray();
-            try {
-                featuredEvents = jsonObject.get("featured").getAsJsonArray();
-            }
-            catch (Exception e){
-                featuredEvents = null;
-            }
-            featuredEventsAdapter = new FeaturedEventsAdapter(getEventsList(featuredEvents), this);
-            featured_recycler.setAdapter(featuredEventsAdapter);
-            featuredShimmer.setVisibility(View.GONE);
+        //featured events
+        JsonArray featuredEvents = new JsonArray();
+        try {
+            featuredEvents = jsonObject.get("featured").getAsJsonArray();
+        } catch (Exception e) {
+            featuredEvents = null;
+        }
+        featuredEventsAdapter = new FeaturedEventsAdapter(getEventsList(featuredEvents), this);
+        //featuredEventsAdapter = new FeaturedEventsAdapter(getEventsList(featuredEvents), this);
+        featured_recycler.setAdapter(featuredEventsAdapter);
+        featuredShimmer.setVisibility(View.GONE);
 
-            //master list
-            JsonObject masterListObj = jsonObject.get("list").getAsJsonObject().get("masterList").getAsJsonObject();
+        //master list
+        JsonObject masterListObj = jsonObject.get("list").getAsJsonObject().get("masterList").getAsJsonObject();
 
 //            JsonArray masterList = jsonObject.get("list").getAsJsonObject().get("masterList").getAsJsonArray();
 //            Log.d("list", masterList.toString());
 
-            //picks for courousel
-            JsonObject picksObj = jsonObject.get("picks").getAsJsonObject().get("masterList").getAsJsonObject();
-            Log.d("picks", picksObj.toString());
-            Map<String, JsonObject> attributes = new HashMap<String, JsonObject>();
-            Set<Map.Entry<String, JsonElement>> entrySet = picksObj.entrySet();
-            for(Map.Entry<String,JsonElement> entry : entrySet){
-                SliderUtil sliderUtils = new SliderUtil();
-                attributes.put(entry.getKey(), picksObj.get(entry.getKey()).getAsJsonObject());
-                sliderUtils.setSliderImageUrl(picksObj.get(entry.getKey()).getAsJsonObject().get("headerImage").getAsString());
-                sliderUtils.setAction_url("https://insider.in/"+picksObj.get(entry.getKey()).getAsJsonObject().get("slug").getAsString());
-                sliderImg.add(sliderUtils);
-            }
-            Log.d("events", sliderImg.get(5).getAction_url());
+        //picks for courousel
+        JsonObject picksObj = jsonObject.get("picks").getAsJsonObject().get("masterList").getAsJsonObject();
+        Log.d("picks", picksObj.toString());
+        Map<String, JsonObject> attributes = new HashMap<String, JsonObject>();
+        Set<Map.Entry<String, JsonElement>> entrySet = picksObj.entrySet();
+        for (Map.Entry<String, JsonElement> entry : entrySet) {
+            SliderUtil sliderUtils = new SliderUtil();
+            attributes.put(entry.getKey(), picksObj.get(entry.getKey()).getAsJsonObject());
+            sliderUtils.setSliderImageUrl(picksObj.get(entry.getKey()).getAsJsonObject().get("headerImage").getAsString());
+            sliderUtils.setAction_url("https://insider.in/" + picksObj.get(entry.getKey()).getAsJsonObject().get("slug").getAsString());
+            sliderImg.add(sliderUtils);
+        }
+        Log.d("events", sliderImg.get(5).getAction_url());
 
-            viewPagerAdapter = new ViewPagerAdapter(MainActivity.this, sliderImg);
-            bannerShimmer.setVisibility(View.GONE);
+        viewPagerAdapter = new ViewPagerAdapter(MainActivity.this, sliderImg);
+        bannerShimmer.setVisibility(View.GONE);
 
-            viewPager.setAdapter(viewPagerAdapter);
+        viewPager.setAdapter(viewPagerAdapter);
 
-            dotscount = viewPagerAdapter.getCount();
+        dotscount = viewPagerAdapter.getCount();
 
-            dots = new TextView[dotscount];
+        dots = new TextView[dotscount];
 
-            sliderDotspanel.removeAllViews();
-            for (int i = 0; i < dots.length; i++) {
-                dots[i] = new TextView(this);
-                dots[i].setText(Html.fromHtml("&#8226;"));
-                dots[i].setTextSize(20);
-                dots[i].setTextColor(R.color.colorAccent);
-                sliderDotspanel.addView(dots[i]);
-            }
+        sliderDotspanel.removeAllViews();
+        for (int i = 0; i < dots.length; i++) {
+            dots[i] = new TextView(this);
+            dots[i].setText(Html.fromHtml("&#8226;"));
+            dots[i].setTextSize(20);
+            dots[i].setTextColor(R.color.colorAccent);
+            sliderDotspanel.addView(dots[i]);
+        }
 
-            if (dots.length > 0)
-                dots[0].setTextColor(R.color.colorAccent);
+        if (dots.length > 0)
+            dots[0].setTextColor(R.color.colorAccent);
 
 
-            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                    for(int i = 0; i< dotscount; i++){
-                        dots[i].setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.unselected_indicator));
-                    }
-
-                    dots[position].setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.selected_indicator));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                for (int i = 0; i < dotscount; i++) {
+                    dots[i].setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.unselected_indicator));
                 }
 
-                @Override
-                public void onPageSelected(int position) {
-
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            });
-
-            //comedy events
-            JsonArray comedyEventsList = new JsonArray();
-            try {
-                JsonArray comedyEvents = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Comedy").getAsJsonArray();
-                for (int j=0; j<comedyEvents.size(); j++){
-                    comedyEventsList.add(masterListObj.get(comedyEvents.get(j).getAsString()).getAsJsonObject());
-                }
+                dots[position].setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.selected_indicator));
             }
-            catch (Exception e){
-                comedyEventsList = null;
-            }
-            eventsAdapter = new EventsAdapter(getEventsList(comedyEventsList), this);
-            comedy_recycler.setAdapter(eventsAdapter);
-            comedyShimmer.setVisibility(View.GONE);
 
-            //music events
-            JsonArray musicEventsList = new JsonArray();
-            try {
-                JsonArray musicEvents = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Music").getAsJsonArray();
-                for (int j=0; j<musicEvents.size(); j++){
-                    musicEventsList.add(masterListObj.get(musicEvents.get(j).getAsString()).getAsJsonObject());
-                }
+            @Override
+            public void onPageSelected(int position) {
+
             }
-            catch (Exception e){
-                musicEventsList = null;
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
             }
-            eventsAdapter = new EventsAdapter(getEventsList(musicEventsList), this);
-            music_recycler.setAdapter(eventsAdapter);
-            musicShimmer.setVisibility(View.GONE);
+        });
+
+        //comedy events
+        JsonArray comedyEventsList = new JsonArray();
+        try {
+            JsonArray comedyEvents = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Comedy").getAsJsonArray();
+            for (int j = 0; j < comedyEvents.size(); j++) {
+                comedyEventsList.add(masterListObj.get(comedyEvents.get(j).getAsString()).getAsJsonObject());
+            }
+        } catch (Exception e) {
+            comedyEventsList = null;
+        }
+        eventsAdapter = new EventsAdapter(getEventsList(comedyEventsList), this);
+        comedy_recycler.setAdapter(eventsAdapter);
+        comedyShimmer.setVisibility(View.GONE);
+
+        //music events
+        JsonArray musicEventsList = new JsonArray();
+        try {
+            JsonArray musicEvents = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Music").getAsJsonArray();
+            for (int j = 0; j < musicEvents.size(); j++) {
+                musicEventsList.add(masterListObj.get(musicEvents.get(j).getAsString()).getAsJsonObject());
+            }
+        } catch (Exception e) {
+            musicEventsList = null;
+        }
+        eventsAdapter = new EventsAdapter(getEventsList(musicEventsList), this);
+        music_recycler.setAdapter(eventsAdapter);
+        musicShimmer.setVisibility(View.GONE);
 
 
-            //workshop events
-            JsonArray workshopEventsList = new JsonArray();
-            try {
-                JsonArray workshopEvents = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Workshops").getAsJsonArray();
-                for (int j=0; j<workshopEvents.size(); j++){
-                    workshopEventsList.add(masterListObj.get(workshopEvents.get(j).getAsString()).getAsJsonObject());
-                }
+        //workshop events
+        JsonArray workshopEventsList = new JsonArray();
+        try {
+            JsonArray workshopEvents = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Workshops").getAsJsonArray();
+            for (int j = 0; j < workshopEvents.size(); j++) {
+                workshopEventsList.add(masterListObj.get(workshopEvents.get(j).getAsString()).getAsJsonObject());
             }
-            catch (Exception e){
-                workshopEventsList = null;
-            }
-            eventsAdapter = new EventsAdapter(getEventsList(workshopEventsList), this);
-            workshop_recycler.setAdapter(eventsAdapter);
-            workshopShimmer.setVisibility(View.GONE);
+        } catch (Exception e) {
+            workshopEventsList = null;
+        }
+        eventsAdapter = new EventsAdapter(getEventsList(workshopEventsList), this);
+        workshop_recycler.setAdapter(eventsAdapter);
+        workshopShimmer.setVisibility(View.GONE);
 
-            //online courses events
-            JsonArray onlineEventsList = new JsonArray();
-            try {
-                JsonArray Events = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Online Course").getAsJsonArray();
-                for (int j=0; j<Events.size(); j++){
-                    onlineEventsList.add(masterListObj.get(Events.get(j).getAsString()).getAsJsonObject());
-                }
+        //online courses events
+        JsonArray onlineEventsList = new JsonArray();
+        try {
+            JsonArray Events = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Online Course").getAsJsonArray();
+            for (int j = 0; j < Events.size(); j++) {
+                onlineEventsList.add(masterListObj.get(Events.get(j).getAsString()).getAsJsonObject());
             }
-            catch (Exception e){
-                onlineEventsList = null;
-            }
-            eventsAdapter = new EventsAdapter(getEventsList(onlineEventsList), this);
-            online_recycler.setAdapter(eventsAdapter);
-            onlineShimmer.setVisibility(View.GONE);
+        } catch (Exception e) {
+            onlineEventsList = null;
+        }
+        eventsAdapter = new EventsAdapter(getEventsList(onlineEventsList), this);
+        online_recycler.setAdapter(eventsAdapter);
+        onlineShimmer.setVisibility(View.GONE);
 
-            //online courses events
-            JsonArray healthEventsList = new JsonArray();
-            try {
-                JsonArray Events = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Health and Fitness").getAsJsonArray();
-                for (int j=0; j<Events.size(); j++){
-                    healthEventsList.add(masterListObj.get(Events.get(j).getAsString()).getAsJsonObject());
-                }
+        //online courses events
+        JsonArray healthEventsList = new JsonArray();
+        try {
+            JsonArray Events = jsonObject.get("list").getAsJsonObject().get("categorywiseList").getAsJsonObject().get("Health and Fitness").getAsJsonArray();
+            for (int j = 0; j < Events.size(); j++) {
+                healthEventsList.add(masterListObj.get(Events.get(j).getAsString()).getAsJsonObject());
             }
-            catch (Exception e){
-                healthEventsList = null;
-            }
-            eventsAdapter = new EventsAdapter(getEventsList(healthEventsList), this);
-            health_recycler.setAdapter(eventsAdapter);
-            healthShimmer.setVisibility(View.GONE);
-
-            });
+        } catch (Exception e) {
+            healthEventsList = null;
+        }
+        eventsAdapter = new EventsAdapter(getEventsList(healthEventsList), this);
+        health_recycler.setAdapter(eventsAdapter);
+        healthShimmer.setVisibility(View.GONE);
     }
 
+     private void showCities() {
+         CFAlertDialog.Builder builder = new CFAlertDialog.Builder(this);
+         builder.setDialogStyle(CFAlertDialog.CFAlertStyle.ALERT);
+         builder.setCancelable(false);
+         builder.setTitle("Select city");
+         builder.setSingleChoiceItems(cities, -1, new DialogInterface.OnClickListener() {
+             @Override
+             public void onClick(DialogInterface dialogInterface, int index) {
+                 //Toast.makeText(MainActivity.this, cities[index], Toast.LENGTH_SHORT).show();
+             }
+         });
+         builder.addButton("DONE", -1, -1, CFAlertDialog.CFAlertActionStyle.POSITIVE, CFAlertDialog.CFAlertActionAlignment.END, new DialogInterface.OnClickListener() {
+             @Override
+             public void onClick(DialogInterface dialogInterface, int i) {
+                 dialogInterface.dismiss();
+                 sharedPref.setCity(cities[i]);
+                 eventsViewModel.getEventRepository(cities[i]).observe(MainActivity.this, jsonObject -> {
+                     updateUI(jsonObject);
+                 });
 
-    private List<EventModel> getEventsList(JsonArray jsonElements){
+             }
+         });
+         CFAlertDialog alertDialog = builder.create();
+         alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+             @Override
+             public void onDismiss(DialogInterface dialog) {
+
+                 // Do something here when dialog dismissed.
+                 Log.d("dismiss", "dismiss");
+                 dialog.dismiss();
+             }
+         });
+         alertDialog.show();
+     }
+
+
+     private List<EventModel> getEventsList(JsonArray jsonElements){
         List<EventModel> list = new ArrayList<>();
         if (jsonElements != null) {
 
             for (int i = 0; i < jsonElements.size(); i++) {
                 JsonObject object = jsonElements.get(i).getAsJsonObject();
-                String id = "", name = "", horizontal_cover_image = "", vertical_image = "", city = "", venue_name = "", venue_date_string = "", min_price = "", price_display_string = "";
+                String id = "", name = "", slug = "", horizontal_cover_image = "", vertical_image = "", city = "", venue_name = "", venue_date_string = "", min_price = "", price_display_string = "";
                 JsonObject category = new JsonObject(), group = new JsonObject();
 
                 try {
@@ -379,8 +449,13 @@ import java.util.*;
                 } catch (Exception e) {
 
                 }
+                try {
+                    slug = object.get("slug").getAsString();
+                } catch (Exception e) {
 
-                EventModel eventModel = new EventModel(id, name, horizontal_cover_image, vertical_image, city, venue_name, venue_date_string, category, group, min_price, price_display_string);
+                }
+
+                EventModel eventModel = new EventModel(id, name, horizontal_cover_image, vertical_image, city, venue_name, venue_date_string, category, group, min_price, price_display_string, slug);
                 list.add(eventModel);
             }
         }

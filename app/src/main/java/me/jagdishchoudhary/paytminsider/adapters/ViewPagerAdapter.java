@@ -13,6 +13,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.Glide;
 import me.jagdishchoudhary.paytminsider.R;
+import me.jagdishchoudhary.paytminsider.WebActivity;
 import me.jagdishchoudhary.paytminsider.utils.SliderUtil;
 
 import java.util.List;
@@ -58,9 +59,10 @@ public class ViewPagerAdapter extends PagerAdapter {
                 Log.d("position1", utils.getAction_url());
 
                 try {
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse(utils.getAction_url()));
-                    context.startActivity(i);
+                    Intent intent = new Intent(context, WebActivity.class);
+                    intent.putExtra("url", utils.getAction_url());
+                    context.startActivity(intent);
+
                 }
                 catch (Exception e){
                     Log.d("error", e.toString());
