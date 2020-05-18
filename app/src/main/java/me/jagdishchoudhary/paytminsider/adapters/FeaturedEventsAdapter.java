@@ -64,7 +64,8 @@ public class FeaturedEventsAdapter extends RecyclerView.Adapter<FeaturedEventsAd
         holder.event_time.setText(eventModel.getVenue_date_string());
         holder.event_price.setText("Rs. "+eventModel.getPrice_display_string());
         holder.event_type.setText(eventModel.getCategory().get("name").getAsString());
-        Glide.with(context).load(eventModel.getVertical_image()).into(holder.event_image);
+       // Glide.with(context).load(eventModel.getVertical_image()).into(holder.event_image);
+        Picasso.get().load(eventModel.getVertical_image()).into(holder.event_image);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

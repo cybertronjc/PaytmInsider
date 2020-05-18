@@ -189,7 +189,10 @@ import java.util.*;
         eventsViewModel.init();
         if (!sharedPref.getCity().isEmpty()) {
             eventsViewModel.getEventRepository(sharedPref.getCity()).observe(this, jsonObject -> {
-                updateUI(jsonObject);
+                if (jsonObject != null){
+                    updateUI(jsonObject);
+                }
+
             });
         }
         else {
