@@ -1,6 +1,7 @@
 # Paytm Insider Android developer task
 
 This repo is a task for android developer position at Paytm Insider. It shows the list of events in your city.
+App can be installed on Android device by downloading apk from app/release folder.
 
 
 # Getting started
